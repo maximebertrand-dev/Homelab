@@ -283,7 +283,8 @@ function rendreTransferts(liste) {
     const [ok, libelle] = ETATS_TRANSFERT[t.etat] ?? ["avert", "inconnu"];
     // Avancement en volume (copie de fichiers) ou, à défaut, en nombre de fichiers (envoi des photos).
     const enFichiers = !(t.total > 0) && t.fichiers_total > 0;
-    const part = t.total > 0 ? t.octets / t.total : enFichiers ? t.fichiers / t.fichiers_total : 0;
+    // Terminé : 100 %, même si le journal n'a plus les lignes d'avancement (rotation).
+    const part = t.etat === 2 ? 1 : t.total > 0 ? t.octets / t.total : enFichiers ? t.fichiers / t.fichiers_total : 0;
     const nombre = (n) => n.toLocaleString("fr-FR");
     const barre = el("span");
     barre.style.width = `${Math.min(part, 1) * 100}%`;
