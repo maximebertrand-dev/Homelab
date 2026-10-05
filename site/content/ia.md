@@ -1,31 +1,36 @@
 ---
 title: L'IA dans ce projet
-description: "Comment j'utilise un assistant IA pour construire et exploiter le homelab, ce qu'il fait, ce que je garde pour moi, et les règles que je me fixe."
+description: "Je conçois, je tranche et je relis ; un assistant IA me conseille et exécute sous mon contrôle. Les rôles de chacun, les garde-fous et les règles que je me fixe."
 date: 2026-10-05
 ---
 
 ## En bref
 
-- Ce homelab est construit **avec l'aide d'un assistant IA** : Claude, d'Anthropic, utilisé dans mon éditeur de code.
-  Je le dis ici, dans le README du dépôt, et chaque commit auquel il a contribué le mentionne.
-- **Je décide, il propose.** Les choix d'architecture, les actions irréversibles et ce qui touche aux données de la
-  famille passent par moi.
+- **Je conçois, je tranche, je relis.** L'architecture, les arbitrages, les actions irréversibles et tout ce qui
+  part en production passent par moi.
+- **L'IA me conseille et exécute sous contrôle.** J'utilise Claude, d'Anthropic, dans mon éditeur de code : comme
+  conseiller, et comme exécutant encadré. Je le dis ici, dans le README du dépôt, et chaque commit auquel il a
+  contribué le mentionne.
 - **Les services n'ont pas besoin de l'IA pour tourner.** Elle sert à construire et à diagnostiquer ; les photos, les
   fichiers et les comptes de la famille ne lui sont jamais confiés.
 
-## Comment je l'utilise
+## Mon rôle, celui de l'IA
 
-**Ce que fait l'assistant** : il rédige l'essentiel du code (OpenTofu, Ansible, scripts) et de la documentation,
-propose des options quand une décision se présente, lance des commandes de diagnostic et de déploiement sur
-l'infrastructure, et relit le résultat (sondes, journaux, captures d'écran).
+**Mon rôle** : je fixe les besoins, je conçois l'architecture et je tranche entre les options écrites dans chaque
+[décision d'architecture](/adr/). Je relis ce qui part en production, je valide toute action irréversible, et
+j'exploite la plateforme au quotidien. Les changements les plus sensibles (règles du pare-feu en production, taille
+des machines, secrets) sont le plus souvent appliqués par moi, à partir d'un plan relu.
 
-**Ce que je fais** : je fixe les besoins, je choisis entre les options écrites dans chaque
-[décision d'architecture](/adr/), je valide les actions irréversibles, et j'exploite la plateforme au quotidien. Les
-changements les plus sensibles (règles du pare-feu en production, taille des machines, secrets) sont le plus
-souvent appliqués par moi, à partir d'un plan relu.
+**L'IA joue deux rôles :**
 
-Concrètement, c'est un travail en binôme : l'assistant va vite et n'oublie pas de documenter ; je connais la maison,
-la famille qui utilise les services, et ce qu'on peut se permettre de casser.
+- **conseiller** : elle propose des options et chiffre leurs compromis (chaque décision garde la trace des options
+  écartées), audite la sécurité de l'existant, et conteste mes choix quand ils sont fragiles ;
+- **exécutant encadré** : elle rédige la majeure partie du code (OpenTofu, Ansible, scripts) et de la documentation,
+  lance les commandes de diagnostic et de déploiement, puis vérifie le résultat (sondes, journaux, captures
+  d'écran), toujours sous ma validation.
+
+Les décisions, les arbitrages et la responsabilité restent à moi. Concrètement : je fixe le cap et je relis ;
+l'assistant va vite, documente tout et me signale ce que j'oublie.
 
 ## Les garde-fous
 

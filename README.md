@@ -116,10 +116,11 @@ Listed so that nothing above over-promises:
 
 ## How this was built
 
-I use Claude (Anthropic's AI assistant) as a pair-programmer, and most commits carry a `Co-Authored-By: Claude`
-trailer. The assistant drafts most of the code and documentation. I set the requirements, choose between the
-options recorded in each ADR, approve every architecture change and run the platform day to day. Changes to
-production firewall rules, VM sizing, the WAF and secrets are applied by me from a reviewed plan.
+I design the architecture, make the calls and review everything that goes to production. Claude (Anthropic's AI
+assistant) works with me in two roles: as an **adviser** (options and trade-offs, security audits, pushback when a
+choice is fragile) and as a **supervised executor**: it drafts most of the code and documentation and runs commands
+under my approval, and most commits carry a `Co-Authored-By: Claude` trailer. Changes to production firewall rules,
+VM sizing, the WAF and secrets are applied by me from a reviewed plan.
 
 The guardrails, what the assistant sees of the family's data, and the outages it caused are described on the
 [AI in this project](https://maximebertrand.net/en/ai/) page.

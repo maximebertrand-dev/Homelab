@@ -1,31 +1,36 @@
 ---
 title: AI in this project
-description: "How I use an AI assistant to build and run the homelab, what it does, what I keep for myself, and the rules I set."
+description: "I design, decide and review; an AI assistant advises me and executes under my control. Who does what, the guardrails and the rules I set."
 slug: ai
 date: 2026-10-05
 ---
 
 ## In short
 
-- This homelab is built **with the help of an AI assistant**: Claude, by Anthropic, used inside my code editor. I say
-  so here and in the repository's README, and every commit it contributed to says so too.
-- **I decide, it proposes.** Architecture choices, irreversible actions and anything touching the family's data go
-  through me.
+- **I design, I decide, I review.** The architecture, the trade-offs, irreversible actions and everything that goes
+  to production go through me.
+- **The AI advises me and executes under control.** I use Claude, by Anthropic, inside my code editor: as an adviser,
+  and as a supervised executor. I say so here and in the repository's README, and every commit it contributed to says
+  so too.
 - **The services do not need AI to run.** It is used to build and to diagnose; the family's photos, files and
   accounts are never handed to it.
 
-## How I use it
+## My role, the AI's role
 
-**What the assistant does**: it writes most of the code (OpenTofu, Ansible, scripts) and of the documentation,
-proposes options when a decision comes up, runs diagnostic and deployment commands on the infrastructure, and checks
-the result (probes, logs, screenshots).
+**My role**: I set the requirements, design the architecture and decide between the options written down in each
+[architecture decision](/en/adr/). I review what goes to production, approve every irreversible action, and run the
+platform day to day. The most sensitive changes (production firewall rules, machine sizing, secrets) are usually
+applied by me, from a reviewed plan.
 
-**What I do**: I set the requirements, choose between the options written down in each
-[architecture decision](/en/adr/), approve irreversible actions, and run the platform day to day. The most sensitive
-changes (production firewall rules, machine sizing, secrets) are usually applied by me, from a reviewed plan.
+**The AI plays two roles:**
 
-In practice it is pair work: the assistant is fast and never forgets to document; I know the house, the family who use
-the services, and what we can afford to break.
+- **adviser**: it proposes options and weighs their trade-offs (each decision keeps a record of the options ruled
+  out), audits the security of what exists, and challenges my choices when they are fragile;
+- **supervised executor**: it writes most of the code (OpenTofu, Ansible, scripts) and of the documentation, runs the
+  diagnostic and deployment commands, then checks the result (probes, logs, screenshots), always under my approval.
+
+Decisions, trade-offs and responsibility stay with me. In practice: I set the course and review; the assistant is
+fast, documents everything and points out what I forget.
 
 ## Guardrails
 
