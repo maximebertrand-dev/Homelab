@@ -19,6 +19,8 @@ hyperviseur_depot_medias: []
 # Cache ZFS (ARC), en octets : plafond et plancher. Vide = réglages de l'installation de Proxmox (plafond à 10 % de
 # la RAM, plancher à 1/32). Un plancher évite que le cache fonde sous la pression des VM (métadonnées relues sur disque).
 hyperviseur_zfs_arc_max: ""
+# Cache d'écriture des disques SAS activé au démarrage (règle udev) : ZFS vide le cache à chaque transaction.
+hyperviseur_cache_ecriture: true
 hyperviseur_zfs_arc_min: ""
 # Ordre de démarrage : VMID => réglage Proxmox (order, up = secondes d'attente avant la suivante).
 hyperviseur_demarrage: {}

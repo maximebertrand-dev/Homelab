@@ -100,6 +100,21 @@
   when: hyperviseur_arc is changed
   changed_when: true
 
+# Cache d'écriture des disques : désactivé en usine sur ces disques SAS, chaque écriture attendait la rotation du
+# plateau (disques occupés 2 fois plus pour le même débit, 05/10). ZFS demande un vidage du cache à chaque
+# transaction : sans risque, à condition que le noyau sache le cache actif (réglage par cache_type, pas par smartctl,
+# sinon les vidages sont ignorés). Réappliqué à chaque démarrage et à chaque disque ajouté.
+- name: Activer le cache d'écriture des disques (vidages transmis par le noyau)
+  ansible.builtin.copy:
+    dest: /etc/udev/rules.d/60-disques-cache-ecriture.rules
+    content: |
+      # Géré par Ansible (rôle hyperviseur)
+      ACTION=="add", SUBSYSTEM=="scsi_disk", ATTR{cache_type}="write back"
+    owner: root
+    group: root
+    mode: "0644"
+  when: hyperviseur_cache_ecriture | bool
+
 - name: Configurer les instantanés des données
   ansible.builtin.copy:
     dest: /etc/sanoid/sanoid.conf
