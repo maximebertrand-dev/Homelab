@@ -1,6 +1,6 @@
 # Coffre à secrets OpenBao (fork libre de HashiCorp Vault), installé depuis le paquet officiel.
-coffre_version: "2.6.3"
-coffre_sha256: 5fc11b4aa2bd51eccfda8a694131d88410d3f3d60420aadb2d8c31558db03acd
+coffre_version: "2.6.4"
+coffre_sha256: 09e0b4ced4cfa2f04a3573c5ec05c94ecd4f858d580d76c7422c51b99b74cce1
 coffre_nom: "vault.{{ domaine_interne }}"
 coffre_port: 8200
 
