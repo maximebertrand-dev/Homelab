@@ -19,9 +19,12 @@
     <aside class="sommaire" aria-label="{{ T "sommaire" }}"><p>{{ T "sur_cette_page" }}</p>{{ . }}</aside>
     {{ end }}{{ end }}
   </div>
+  {{- /* Pages voisines dans une section seulement (pas entre les pages isolées du site). */}}
+  {{ if .Section }}
   <nav class="enveloppe suite" aria-label="{{ T "pages_voisines" }}">
     {{ with .PrevInSection }}<a class="suite__lien" href="{{ .RelPermalink }}"><span>{{ T "precedent" }}</span>{{ .Title }}</a>{{ end }}
     {{ with .NextInSection }}<a class="suite__lien suite__lien--droite" href="{{ .RelPermalink }}"><span>{{ T "suivant" }}</span>{{ .Title }}</a>{{ end }}
   </nav>
+  {{ end }}
 </article>
 {{ end }}

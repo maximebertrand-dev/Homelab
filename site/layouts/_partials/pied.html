@@ -6,7 +6,7 @@
     </div>
     <p class="pied__note">{{ T "pied_note" }}</p>
     <p class="pied__liens"><a href="{{ site.Params.depot }}" rel="noopener">{{ T "code_source" }}</a>
-      {{- range slice "adr" "journal" "runbooks" "postmortems" "mentions-legales" "confidentialite" }}
+      {{- range slice "adr" "journal" "runbooks" "postmortems" "ia" "mentions-legales" "confidentialite" }}
       {{- with site.GetPage (printf "/%s" .) }} · <a href="{{ .RelPermalink }}">{{ if eq .Section "adr" }}{{ T "decisions" }}{{ else }}{{ .Title }}{{ end }}</a>{{ end }}
       {{- end }}</p>
   </div>

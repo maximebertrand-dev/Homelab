@@ -121,6 +121,9 @@ trailer. The assistant drafts most of the code and documentation. I set the requ
 options recorded in each ADR, approve every architecture change and run the platform day to day. Changes to
 production firewall rules, VM sizing, the WAF and secrets are applied by me from a reviewed plan.
 
+The guardrails, what the assistant sees of the family's data, and the outages it caused are described on the
+[AI in this project](https://maximebertrand.net/en/ai/) page.
+
 ## License
 
 [MIT](LICENSE)
