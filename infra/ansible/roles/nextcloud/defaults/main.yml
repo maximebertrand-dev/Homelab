@@ -22,3 +22,12 @@ nextcloud_quota_defaut: ""
 nextcloud_stockages_externes: []
 # Applications désactivées : chaque application active élargit la surface d'attaque.
 nextcloud_applis_desactivees: [dashboard, weather_status, firstrunwizard, recommendations, survey_client, support, app_api, photos]
+# Habillage (application « Thème ») aux couleurs du homelab, comme le portail de connexion. Fichiers : files/theme.
+nextcloud_theme:
+  nom: Drive
+  slogan: Les fichiers de la famille
+  url: "https://accueil.{{ domaine_public }}"
+  mentions: "https://{{ domaine_public }}/mentions-legales/"
+  confidentialite: "https://{{ domaine_public }}/confidentialite/"
+  couleur: "#0d9488"
+  fond_couleur: "#070b14"

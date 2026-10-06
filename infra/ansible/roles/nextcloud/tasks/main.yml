@@ -316,3 +316,56 @@
     label: "{{ item.point }}"
   register: nextcloud_reglages_stockages
   changed_when: nextcloud_reglages_stockages.stdout_lines | length > 1
+
+# --- Habillage (application « Thème ») --------------------------------------------------------------------------
+# Appliqué seulement quand la charte change : une empreinte des réglages et des fichiers est gardée dans la
+# configuration de Nextcloud (theming/homelab_charte).
+- name: Déposer les fichiers du thème
+  ansible.builtin.copy:
+    src: theme/
+    dest: "{{ nextcloud_dossier }}/theme/"
+    owner: root
+    group: root
+    mode: "0644"
+
+- name: Calculer l'empreinte de la charte
+  ansible.builtin.set_fact:
+    nextcloud_theme_empreinte: >-
+      {{ (nextcloud_theme | to_json
+          ~ lookup('ansible.builtin.pipe', 'sha1sum ' ~ (role_path ~ '/files/theme/logo.svg') | quote)
+          ~ lookup('ansible.builtin.pipe', 'sha1sum ' ~ (role_path ~ '/files/theme/fond.jpg') | quote)) | hash('sha1') }}
+
+- name: Lire l'empreinte de la charte appliquée
+  ansible.builtin.command:
+    cmd: docker compose exec -T -u www-data app php occ config:app:get theming homelab_charte
+    chdir: "{{ nextcloud_dossier }}"
+  register: nextcloud_theme_actuel
+  changed_when: false
+  failed_when: false
+
+- name: Appliquer le thème
+  ansible.builtin.shell:
+    cmd: |
+      set -euo pipefail
+      occ() { docker compose exec -T -u www-data app php occ "$@"; }
+      docker compose exec -T app mkdir -p /tmp/theme
+      docker compose cp theme/logo.svg app:/tmp/theme/logo.svg
+      docker compose cp theme/fond.jpg app:/tmp/theme/fond.jpg
+      docker compose exec -T app chown -R www-data /tmp/theme
+      occ theming:config name {{ nextcloud_theme.nom | quote }}
+      occ theming:config slogan {{ nextcloud_theme.slogan | quote }}
+      occ theming:config url {{ nextcloud_theme.url | quote }}
+      occ theming:config imprintUrl {{ nextcloud_theme.mentions | quote }}
+      occ theming:config privacyUrl {{ nextcloud_theme.confidentialite | quote }}
+      occ theming:config primary_color {{ nextcloud_theme.couleur | quote }}
+      occ theming:config background_color {{ nextcloud_theme.fond_couleur | quote }}
+      occ theming:config logo /tmp/theme/logo.svg
+      occ theming:config logoheader /tmp/theme/logo.svg
+      occ theming:config favicon /tmp/theme/logo.svg
+      occ theming:config background /tmp/theme/fond.jpg
+      occ config:app:set theming homelab_charte --value={{ nextcloud_theme_empreinte }}
+      docker compose exec -T app rm -rf /tmp/theme
+    chdir: "{{ nextcloud_dossier }}"
+    executable: /bin/bash
+  when: nextcloud_theme_actuel.stdout | trim != nextcloud_theme_empreinte
+  changed_when: true
