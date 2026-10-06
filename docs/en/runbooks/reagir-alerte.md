@@ -22,6 +22,7 @@ Rules: `infra/ansible/roles/supervision/files/alertes.yml`. Monitoring choices:
 | security | email + notification, one per machine | every 12 h |
 | watch (updates, known vulnerabilities) | email + notification, grouped | every week |
 | info | low-priority notification | once a day |
+| admin (rules from the private repository) | email + notification, never on the NOC | every 12 h, then a resolution message |
 
 An active critical alert silences the warnings of the same machine (inhibition rule): deal with the critical one
 first.

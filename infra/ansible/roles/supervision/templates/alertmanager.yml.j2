@@ -1,6 +1,7 @@
 # {{ ansible_managed }}
 # Alertes critiques : e-mail + notification sur téléphone (ntfy){% if supervision_sms_free.cle is defined %} + SMS (Free Mobile){% endif %}.
-# Avertissements : affichés sur le NOC seulement.
+# Avertissements : affichés sur le NOC seulement. « admin » : e-mail + téléphone, hors NOC (sujets réservés à
+# l'administrateur).
 global:
   smtp_smarthost: "{{ supervision_smtp.serveur }}:587"
   smtp_from: "Supervision homelab <{{ supervision_smtp.expediteur }}>"
@@ -31,6 +32,11 @@ route:
       group_by: [alertname, travail]
       group_wait: 30s
       repeat_interval: 24h
+    - matchers: ['severite="admin"']
+      receiver: admin
+      group_by: [alertname, instance]
+      group_wait: 1m
+      repeat_interval: 12h
     - matchers: ['severite="veille"']
       receiver: veille
       group_by: [alertname]
@@ -80,6 +86,16 @@ receivers:
       # délai de 100 ms, parfois dépassé ici : notifications perdues le 29/09).
       - url: "http://ntfy-relais:8080/alertmanager?priorite=high&prefixe=SECURITE"
         send_resolved: false
+
+  - name: admin
+    email_configs:
+      - to: "{{ supervision_email_alertes }}"
+        send_resolved: true
+        headers:
+          Subject: '{{ '{{' }} if eq .Status "firing" {{ '}}' }}[ADMIN]{{ '{{' }} else {{ '}}' }}[RÉSOLU]{{ '{{' }} end {{ '}}' }} {{ '{{' }} .CommonLabels.alertname {{ '}}' }} — {{ '{{' }} .CommonLabels.instance {{ '}}' }}'
+    webhook_configs:
+      - url: "http://ntfy-relais:8080/alertmanager?priorite=default&prefixe=ADMIN"
+        send_resolved: true
 
   - name: info
     webhook_configs:

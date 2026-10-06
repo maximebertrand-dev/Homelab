@@ -1,4 +1,5 @@
 # Règles d'alerte. Niveau « critique » : e-mail + notification sur téléphone ; « avertissement » : NOC uniquement.
+# D'autres règles peuvent venir d'ailleurs (supervision_regles_supplementaires), ex. en gravité « admin ».
 groups:
   - name: disponibilite
     rules:

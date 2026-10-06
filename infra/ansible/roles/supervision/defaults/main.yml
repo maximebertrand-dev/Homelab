@@ -150,3 +150,8 @@ supervision_detection_regles:
     resume: "Comptes, sudo ou clés SSH modifiés"
     description: "auditd a vu une écriture sur les comptes, sudoers, la configuration SSH ou des clés autorisées (normal pendant un déploiement Ansible)"
 supervision_detection_regles_supplementaires: []
+# Règles d'alerte (groupes Prometheus, YAML) et tableaux Grafana (JSON) venus d'ailleurs, ex. d'un dépôt privé :
+# chemins de fichiers sur le poste de contrôle, copiés tels quels (sans interprétation par Ansible, les gabarits
+# « {{ $labels… }} » des règles restent intacts). Gravité « admin » : e-mail + téléphone, jamais sur le NOC.
+supervision_regles_supplementaires: []
+supervision_tableaux_supplementaires: []

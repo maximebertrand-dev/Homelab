@@ -3,7 +3,8 @@ global:
   scrape_interval: 30s
   evaluation_interval: 30s
 
-rule_files: [/etc/prometheus/alertes.yml]
+# Règles du rôle, puis règles supplémentaires (supervision_regles_supplementaires).
+rule_files: [/etc/prometheus/alertes.yml, /etc/prometheus/regles-*.yml]
 
 alerting:
   alertmanagers:

@@ -23,6 +23,7 @@ Règles : `infra/ansible/roles/supervision/files/alertes.yml`. Choix de la super
 | sécurité | e-mail + notification, une par machine | toutes les 12 h |
 | veille (mises à jour, failles connues) | e-mail + notification, regroupées | chaque semaine |
 | info | notification discrète | une fois par jour |
+| admin (règles venues du dépôt privé) | e-mail + notification, jamais sur le NOC | toutes les 12 h, puis un message de fin |
 
 Une alerte critique en cours fait taire les avertissements de la même machine (règle d'inhibition) : traiter la
 critique d'abord.

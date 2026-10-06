@@ -202,6 +202,26 @@
     label: "{{ item.dest }}"
   notify: Redémarrer la supervision
 
+- name: Déposer les règles d'alerte supplémentaires
+  ansible.builtin.copy:
+    src: "{{ item }}"
+    dest: "{{ supervision_dossier }}/prometheus/regles-{{ item | basename }}"
+    owner: root
+    group: root
+    mode: "0644"
+  loop: "{{ supervision_regles_supplementaires }}"
+  notify: Redémarrer la supervision
+
+- name: Déposer les tableaux Grafana supplémentaires
+  ansible.builtin.copy:
+    src: "{{ item }}"
+    dest: "{{ supervision_dossier }}/grafana/tableaux/{{ item | basename }}"
+    owner: root
+    group: root
+    mode: "0644"
+  loop: "{{ supervision_tableaux_supplementaires }}"
+  notify: Redémarrer la supervision
+
 - name: Déposer le relais des notifications sur téléphone (ntfy)
   ansible.builtin.copy:
     src: ntfy/relais.py
