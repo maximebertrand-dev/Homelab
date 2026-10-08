@@ -45,6 +45,10 @@ first.
 | `CourrielsEnEchec`, `CourrielsReleveImpossible` | The email relay's console (activity, bounces); check the domain's SPF, DKIM and DMARC |
 | `OutilInterneIndisponible`, `CibleDeCollecteInjoignable` | `docker compose ps` and the logs of the service concerned |
 | `JournauxNonRecus` | On the machine: `systemctl status systemd-journal-upload`; on the monitoring side: the VictoriaLogs container |
+| `ConnexionsTentativesAdresseInconnue` | Failed logins from an address that has never logged in successfully, with no success within 15 min: Grafana "Connexions" (address, provider, targeted accounts). Isolated and not repeated: nothing to do (the WAF and Authelia throttle attempts); repeated or aimed at one account: warn the person, check their password |
+| `ConnexionsMotDePasseSansSecondFacteur` | Password accepted but second factor failed or never completed. Unless it is a new member registering their two-factor authentication: **change the account's password** and close its sessions (Authelia) |
+| `ConnexionsNouvellesAdresses` (morning digest) | New known addresses since the day before: check that the provider and service are plausible for the family |
+| `VeilleConnexionsArretee` | `docker logs supervision-connexions-1` on the monitoring machine; is VictoriaLogs reachable? |
 
 ## Searching the logs
 

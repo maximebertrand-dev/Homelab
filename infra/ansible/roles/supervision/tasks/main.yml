@@ -95,6 +95,47 @@
     mode: "0644"
   notify: Redémarrer la supervision
 
+# --- Veille des connexions : adresses connues, tentatives depuis une adresse inconnue --------------------
+- name: Veille des connexions
+  when: supervision_connexions | bool
+  block:
+    - name: Créer les dossiers de la veille des connexions
+      ansible.builtin.file:
+        path: "{{ supervision_dossier }}/{{ item.chemin }}"
+        state: directory
+        owner: "{{ item.proprietaire | default('root') }}"
+        group: "{{ item.proprietaire | default('root') }}"
+        mode: "{{ item.mode }}"
+      loop:
+        - { chemin: connexions, mode: "0755" }
+        # Adresses connues et suspectes : seul dossier modifiable par le conteneur.
+        - { chemin: connexions/etat, mode: "0750", proprietaire: "65534" }
+      loop_control:
+        label: "{{ item.chemin }}"
+
+    - name: Déposer le script et la configuration de la veille des connexions
+      ansible.builtin.copy:
+        dest: "{{ supervision_dossier }}/connexions/{{ item.dest }}"
+        content: "{{ item.contenu }}"
+        owner: root
+        group: root
+        mode: "0644"
+      loop:
+        - { dest: veille-connexions.py, contenu: "{{ lookup('ansible.builtin.file', 'connexions/veille-connexions.py') }}\n" }
+        - dest: connexions.json
+          contenu: >-
+            {{ {'conteneur_waf': supervision_connexions_conteneur_waf,
+                'delai_minutes': supervision_connexions_delai_minutes,
+                'resume_heure': supervision_connexions_resume_heure,
+                'amorcage_jours': supervision_connexions_amorcage_jours,
+                'adresses_connues': supervision_connexions_adresses_connues,
+                'regles': supervision_connexions_regles + supervision_connexions_regles_supplementaires,
+                'comptes': supervision_connexions_comptes + supervision_connexions_comptes_supplementaires}
+               | to_nice_json }}
+      loop_control:
+        label: "{{ item.dest }}"
+      notify: Redémarrer la supervision
+
 # --- Veille de sécurité : image locale (Trivy figé + script), configuration -------------------------------
 - name: Veille de sécurité
   when: supervision_veille | bool
@@ -198,6 +239,7 @@
     - { src: transferts.json, dest: grafana/tableaux/transferts.json }
     - { src: stockage.json, dest: grafana/tableaux/stockage.json }
     - { src: journaux.json, dest: grafana/tableaux/journaux.json }
+    - { src: connexions.json, dest: grafana/tableaux/connexions.json }
   loop_control:
     label: "{{ item.dest }}"
   notify: Redémarrer la supervision

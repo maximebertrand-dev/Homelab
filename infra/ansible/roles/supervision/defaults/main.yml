@@ -155,3 +155,38 @@ supervision_detection_regles_supplementaires: []
 # « {{ $labels… }} » des règles restent intacts). Gravité « admin » : e-mail + téléphone, jamais sur le NOC.
 supervision_regles_supplementaires: []
 supervision_tableaux_supplementaires: []
+
+# Veille des connexions (08/10/2026) : une adresse devient « connue » à sa première connexion complète réussie (mot de
+# passe et second facteur) et le reste ; des échecs depuis une adresse inconnue sans succès dans le délai déclenchent
+# une alerte (« admin », ou « securite » si le mot de passe a été accepté). Un résumé des nouvelles adresses connues
+# part chaque jour à l'heure dite (gravité « info »). Requêtes de connexion lues dans les journaux du WAF.
+supervision_connexions: "{{ supervision_journaux | bool }}"
+supervision_connexions_delai_minutes: 15
+supervision_connexions_resume_heure: 8
+supervision_connexions_amorcage_jours: 30
+supervision_connexions_conteneur_waf: waf-bunkerweb-1
+# Adresses ou réseaux toujours connus, en plus des adresses privées (ex. sortie d'un VPN de confiance).
+supervision_connexions_adresses_connues: []
+# Règles : requête vue par le WAF → type d'événement (succes = connexion complète, mot_de_passe = premier facteur
+# accepté, echec, echec_second_facteur). Portail Authelia par défaut ; ajouter les applications à connexion propre
+# dans supervision_connexions_regles_supplementaires.
+supervision_connexions_regles:
+  - { service: portail, hote: "auth.{{ domaine_public }}", methode: POST, chemin: /api/firstfactor, statuts: [200], type: mot_de_passe,
+      cible_depuis_referent: true }
+  - { service: portail, hote: "auth.{{ domaine_public }}", methode: POST, chemin: /api/firstfactor, statuts: [401, 403], type: echec,
+      cible_depuis_referent: true }
+  - { service: portail, hote: "auth.{{ domaine_public }}", methode: POST, chemin: /api/secondfactor/totp, statuts: [200], type: succes,
+      cible_depuis_referent: true }
+  - { service: portail, hote: "auth.{{ domaine_public }}", methode: POST, chemin: /api/secondfactor/totp, statuts: [401, 403],
+      type: echec_second_facteur, cible_depuis_referent: true }
+  - { service: portail, hote: "auth.{{ domaine_public }}", methode: POST, chemin: /api/secondfactor/webauthn, statuts: [200], type: succes,
+      cible_depuis_referent: true }
+  - { service: portail, hote: "auth.{{ domaine_public }}", methode: POST, chemin: /api/secondfactor/webauthn, statuts: [401, 403],
+      type: echec_second_facteur, cible_depuis_referent: true }
+supervision_connexions_regles_supplementaires: []
+# Comptes visés par les échecs, lus dans les journaux des applications (groupe « compte », et « ip » si présente).
+supervision_connexions_comptes:
+  - conteneur: identite-authelia-1
+    mot_cle: Unsuccessful
+    motif: "Unsuccessful .* authentication attempt by user '(?P<compte>[^']+)'.*remote_ip=(?P<ip>[0-9a-fA-F.:]+)"
+supervision_connexions_comptes_supplementaires: []

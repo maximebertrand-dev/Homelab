@@ -299,3 +299,20 @@ groups:
           description: >-
             {{ with query (printf "homelab_import_octets{travail='%s'}" $labels.travail) }}{{ . | first | value | humanize1024
             }}o copiés{{ end }}.
+
+  # Veille des connexions (conteneur « connexions ») : ses propres alertes partent directement à Alertmanager ;
+  # celle-ci signale qu'elle ne tourne plus ou ne lit plus les journaux (sinon, plus aucune tentative ne serait vue).
+  - name: connexions
+    rules:
+      - alert: VeilleConnexionsArretee
+        expr: >-
+          up{job="connexions"} == 0
+          or (time() - homelab_connexions_derniere_execution_timestamp > 600)
+          or homelab_connexions_lecture_ok == 0
+        for: 15m
+        labels: { severite: admin }
+        annotations:
+          resume: "Veille des connexions arrêtée ou aveugle"
+          description: >-
+            Le conteneur « connexions » de mon01 ne tourne plus ou ne lit plus VictoriaLogs depuis 15 minutes : les
+            tentatives de connexion depuis une adresse inconnue ne sont plus signalées. docker logs supervision-connexions-1.

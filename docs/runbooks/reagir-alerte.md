@@ -46,6 +46,10 @@ critique d'abord.
 | `CourrielsEnEchec`, `CourrielsReleveImpossible` | Console du relais d'e-mails (activité, rejets) ; vérifier SPF, DKIM et DMARC du domaine |
 | `OutilInterneIndisponible`, `CibleDeCollecteInjoignable` | `docker compose ps` et journaux du service concerné |
 | `JournauxNonRecus` | Sur la machine : `systemctl status systemd-journal-upload` ; côté supervision : le conteneur VictoriaLogs |
+| `ConnexionsTentativesAdresseInconnue` | Échecs de connexion depuis une adresse jamais vue réussir, sans succès dans les 15 min : Grafana « Connexions » (adresse, opérateur, comptes visés). Isolé et sans suite : rien à faire (le WAF et Authelia limitent les essais) ; répété ou ciblé sur un compte : prévenir la personne, vérifier son mot de passe |
+| `ConnexionsMotDePasseSansSecondFacteur` | Mot de passe accepté mais second facteur raté ou jamais validé. Si ce n'est pas un nouveau membre en train d'enregistrer sa double authentification : **changer le mot de passe du compte** et fermer ses sessions (Authelia) |
+| `ConnexionsNouvellesAdresses` (résumé du matin) | Nouvelles adresses connues depuis la veille : vérifier que l'opérateur et le service sont plausibles pour la famille |
+| `VeilleConnexionsArretee` | `docker logs supervision-connexions-1` sur la machine de supervision ; VictoriaLogs joignable ? |
 
 ## Chercher dans les journaux
 

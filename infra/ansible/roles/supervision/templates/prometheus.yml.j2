@@ -95,3 +95,10 @@ scrape_configs:
     static_configs:
       - targets: ["veille:9800"]
 {% endif %}
+{% if supervision_connexions | bool %}
+
+  # Veille des connexions : adresses connues, tentatives depuis une adresse inconnue.
+  - job_name: connexions
+    static_configs:
+      - targets: ["connexions:9801"]
+{% endif %}

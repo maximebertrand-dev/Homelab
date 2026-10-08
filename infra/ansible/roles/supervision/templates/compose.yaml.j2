@@ -220,6 +220,30 @@ services:
     security_opt: ["no-new-privileges:true"]
 
 {% endif %}
+{% if supervision_connexions | bool %}
+  # Veille des connexions : lit les journaux (VictoriaLogs), envoie ses alertes à Alertmanager, expose ses mesures
+  # sur 9801 au réseau de la pile seulement. Seul dossier modifiable : son état (adresses connues).
+  connexions:
+    image: {{ supervision_images.noc_collecte }}
+    restart: unless-stopped
+    command: ["python3", "-u", "/app/veille-connexions.py"]
+    user: "65534:65534"
+    environment:
+      VICTORIALOGS: http://victorialogs:9428
+      ALERTMANAGER: http://alertmanager:9093
+      CONFIG: /etc/connexions/connexions.json
+      ETAT: /etat/etat.json
+      TZ: Europe/Paris
+    volumes:
+      - ./connexions/veille-connexions.py:/app/veille-connexions.py:ro
+      - ./connexions/connexions.json:/etc/connexions/connexions.json:ro
+      - ./connexions/etat:/etat
+    read_only: true
+    mem_limit: 128m
+    cap_drop: [ALL]
+    security_opt: ["no-new-privileges:true"]
+
+{% endif %}
 {% if supervision_journaux | bool %}
   # Journaux centralisés (ADR 0020). Port HTTP non publié : lecture par Grafana, ou par le relais ci-dessous.
   victorialogs:
