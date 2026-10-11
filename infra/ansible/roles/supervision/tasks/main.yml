@@ -193,6 +193,9 @@
         owner: root
         group: root
         mode: "0644"
+      # Fichier monté dans le conteneur : il ne voit la nouvelle version qu'après un redémarrage (11/10 : « homelab/veille »
+      # déclarée image locale mais toujours analysée, faute de redémarrage).
+      notify: Redémarrer la veille
 
     - name: Déposer le jeton GitHub de la veille (lecture publique seulement)
       ansible.builtin.copy:

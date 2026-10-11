@@ -82,6 +82,8 @@ supervision_veille_sources:
   traefik: { nom: Traefik, github: traefik/traefik }
   netboxcommunity/netbox: { nom: NetBox, github: netbox-community/netbox }
   homelab/semaphore: { nom: Semaphore, github: semaphoreui/semaphore, image_locale: true }
+  # Image de la veille elle-même, construite sur mon01 (Trivy figé, voir supervision_veille_trivy) : pas d'analyse.
+  homelab/veille: { nom: Veille de sécurité, image_locale: true }
   grafana/grafana: { nom: Grafana, github: grafana/grafana }
   prom/prometheus: { nom: Prometheus, github: prometheus/prometheus }
   prom/alertmanager: { nom: Alertmanager, github: prometheus/alertmanager }
