@@ -92,3 +92,6 @@ waf_erreurs:
     texte: "Le service a mis trop de temps à répondre."
     conseil: "Réessayez ; si l'opération était longue (gros envoi), elle a peut-être abouti malgré tout."
     couleur: "#f59e0b"
+
+# Nettoyage horaire des fichiers temporaires d'envoi abandonnés (processus nginx tué en plein envoi) : âge minimal.
+waf_nettoyage_envois_minutes: 120

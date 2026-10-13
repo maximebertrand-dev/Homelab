@@ -1,0 +1,18 @@
+#!/bin/sh
+# {{ ansible_managed }}
+# Fichiers temporaires d'envoi (client_temp) abandonnés par nginx : un processus tué en plein envoi (manque de
+# mémoire) ne les efface pas, et ils finissent par remplir le disque (13/10 : 11,5 Go, WAF à 100 %). On ne supprime
+# que ceux de plus de {{ waf_nettoyage_envois_minutes }} min qu'aucun processus n'a encore ouverts.
+set -eu
+conteneur=waf-bunkerweb-1
+docker ps -q --filter "name=^${conteneur}$" | grep -q . || exit 0
+docker exec "$conteneur" sh -c '
+  dossier=/var/tmp/bunkerweb/client_temp
+  ouverts=$(ls -l /proc/[0-9]*/fd 2>/dev/null | grep -o "client_temp/[^ ]*" | sort -u)
+  n=0; o=0
+  for f in $(find "$dossier" -maxdepth 1 -type f -mmin +{{ waf_nettoyage_envois_minutes }}); do
+    if printf "%s\n" "$ouverts" | grep -qx "client_temp/${f##*/}"; then continue; fi
+    o=$((o + $(stat -c %s "$f"))); rm -f "$f"; n=$((n + 1))
+  done
+  [ "$n" -eq 0 ] || echo "$n fichier(s) d envoi abandonnés supprimés, $((o / 1048576)) Mio libérés"
+' | logger -t waf-nettoyage-envois

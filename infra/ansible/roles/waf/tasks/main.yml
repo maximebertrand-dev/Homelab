@@ -140,6 +140,54 @@
     enabled: true
     daemon_reload: "{{ waf_listes_unites is changed }}"
 
+- name: Déposer le nettoyage des envois abandonnés
+  ansible.builtin.template:
+    src: waf-nettoyage-envois.sh.j2
+    dest: /usr/local/sbin/waf-nettoyage-envois
+    owner: root
+    group: root
+    mode: "0750"
+
+- name: Déclarer le service et la minuterie du nettoyage des envois
+  ansible.builtin.copy:
+    dest: "/etc/systemd/system/waf-nettoyage-envois.{{ item.extension }}"
+    content: "{{ item.contenu }}"
+    owner: root
+    group: root
+    mode: "0644"
+  loop:
+    - extension: service
+      contenu: |
+        # Géré par Ansible (rôle waf)
+        [Unit]
+        Description=Supprimer les fichiers d'envoi abandonnés dans le conteneur du WAF
+        After=docker.service
+        [Service]
+        Type=oneshot
+        ExecStart=/usr/local/sbin/waf-nettoyage-envois
+    - extension: timer
+      contenu: |
+        # Géré par Ansible (rôle waf)
+        [Unit]
+        Description=Nettoyer les fichiers d'envoi abandonnés du WAF toutes les heures
+        [Timer]
+        OnBootSec=15min
+        OnUnitActiveSec=1h
+        [Install]
+        WantedBy=timers.target
+  loop_control:
+    label: "waf-nettoyage-envois.{{ item.extension }}"
+  register: waf_nettoyage_unites
+
+- name: Activer la minuterie du nettoyage des envois
+  ansible.builtin.systemd_service:
+    name: waf-nettoyage-envois.timer
+    state: started
+    enabled: true
+    daemon_reload: "{{ waf_nettoyage_unites is changed }}"
+  # À blanc (--check), l'unité n'est pas encore déposée : pas d'erreur pour autant.
+  ignore_errors: "{{ ansible_check_mode }}"
+
 - name: Attendre que CrowdSec ait installé ses composants
   ansible.builtin.command: >-
     docker exec waf-bunkerweb-1 sh -c
