@@ -28,7 +28,7 @@ des zones.
 
 Le **T330 sous Proxmox VE** porte tout :
 
-- le stockage : pool ZFS **RAIDZ2** sur quatre disques SAS (deux pannes tolérées), système inclus ;
+- le stockage : pool ZFS **RAIDZ2** sur quatre disques SAS, cinq depuis le 05/10/2026 (deux pannes tolérées), système inclus ;
 - le pare-feu : **OPNsense en machine virtuelle**, qui reçoit tout le trafic du homelab (mode DMZ de la Freebox) ;
 - les services : une machine virtuelle par zone de sécurité.
 

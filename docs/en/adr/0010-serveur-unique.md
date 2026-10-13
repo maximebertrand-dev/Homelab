@@ -27,7 +27,7 @@ at €40 a month. The architecture has to work **with a single machine**, withou
 
 The **T330 running Proxmox VE** carries everything:
 
-- storage: a ZFS **RAIDZ2** pool on four SAS disks (two failures tolerated), system included;
+- storage: a ZFS **RAIDZ2** pool on four SAS disks, five since 05/10/2026 (two failures tolerated), system included;
 - the firewall: **OPNsense as a virtual machine**, receiving all the homelab's traffic (the Freebox's DMZ mode);
 - services: one virtual machine per security zone.
 

@@ -29,3 +29,9 @@ Le T330 reste sous **Proxmox VE** (un seul outil sur toute l'infra, pilotable pa
 - Environ 6 To utiles, deux pannes de disque tolérées (pertinent avec des disques d'occasion).
 - Données du NAS et sauvegardes sur la même machine : **copie hors site chiffrée obligatoire**.
 - Les disques des VM ne sont pas stockés sur le NAS, pour ne pas en faire un point unique de défaillance du cluster.
+
+## Mise à jour (07/10/2026)
+
+Le pool est passé à **cinq disques** (extension du RAIDZ2 le 05/10, 13,6 To bruts, ≈ 8 To utiles une fois les données
+réécrites) et un disque usé a été remplacé par le disque de secours le 06/10 : voir le
+[journal du 07/10](../journal/2026-10-07-disques.md).

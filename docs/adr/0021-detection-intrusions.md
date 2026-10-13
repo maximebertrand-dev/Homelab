@@ -67,7 +67,10 @@ Par étapes, la moins coûteuse d'abord ; chaque règle est observée en « aver
 2. **Fait le 29/09** : règles de détection sur les journaux centralisés (vmalert sur VictoriaLogs) : connexions SSH,
    sudo, clés ajoutées, rafales d'échecs de connexion (portail, applications mobiles).
 3. **Fait le 29/09** : auditd sur toutes les machines (rôle commun), vers le journal systemd.
-4. CrowdSec partagé : API locale sur la VM de supervision, agents sur les machines, greffon d'OPNsense (après sa
+4. **Fait le 08/10** : veille des connexions : une adresse devient connue à sa première connexion complète réussie ;
+   des échecs depuis une adresse inconnue sans succès dans le quart d'heure, ou un mot de passe accepté sans second
+   facteur valide, déclenchent une alerte (voir le [journal du 13/10](../journal/2026-10-13-veille-connexions-waf.md)).
+5. CrowdSec partagé : API locale sur la VM de supervision, agents sur les machines, greffon d'OPNsense (après sa
    mise à jour).
-5. Suricata sur OPNsense, en détection puis en prévention sur le WAN (après sa mise à jour ; mémoire du pare-feu
+6. Suricata sur OPNsense, en détection puis en prévention sur le WAN (après sa mise à jour ; mémoire du pare-feu
    portée à 3 Go).

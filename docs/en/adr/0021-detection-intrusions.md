@@ -67,6 +67,9 @@ In stages, the cheapest first; each rule is observed as a "warning" before becom
 2. **Done on 29/09**: detection rules on the centralised logs (vmalert on VictoriaLogs): SSH sign-ins, sudo, keys
    added, bursts of sign-in failures (portal, mobile applications).
 3. **Done on 29/09**: auditd on every machine (common role), into the systemd journal.
-4. Shared CrowdSec: local API on the monitoring VM, agents on the machines, OPNsense plugin (after its update).
-5. Suricata on OPNsense, in detection then prevention mode on the WAN (after its update; firewall memory raised to
+4. **Done on 08/10**: login watch: an address becomes known at its first complete successful login; failures from an
+   unknown address with no success within a quarter of an hour, or a password accepted without a valid second factor,
+   raise an alert (see the [journal entry of 13/10](../journal/2026-10-13-veille-connexions-waf.md)).
+5. Shared CrowdSec: local API on the monitoring VM, agents on the machines, OPNsense plugin (after its update).
+6. Suricata on OPNsense, in detection then prevention mode on the WAN (after its update; firewall memory raised to
    3 GB).

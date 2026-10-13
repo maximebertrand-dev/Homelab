@@ -50,13 +50,13 @@ flowchart LR
 
 | Layer | Tools |
 |---|---|
-| Hardware | Dell PowerEdge T330 (Xeon E3, 32 GB ECC, 4 × 3 TB SAS) |
+| Hardware | Dell PowerEdge T330 (Xeon E3, 32 GB ECC, 5 × 3 TB SAS) |
 | Hypervisor & storage | Proxmox VE, ZFS RAIDZ2, sanoid snapshots |
 | Network & security | OPNsense, VLANs, WireGuard, BunkerWeb (ModSecurity + OWASP CRS), CrowdSec, Cloudflare DNS and Tunnel |
 | Identity | LLDAP, Authelia (OpenID Connect, TOTP, WebAuthn), invitations by one-time link (no password is ever sent) |
 | Infrastructure as Code | OpenTofu (Proxmox, OPNsense, Cloudflare, OpenBao), Ansible, Semaphore UI |
 | Secrets | SOPS + age in Git, OpenBao (OIDC for humans, AppRole for automation) |
-| Observability | Prometheus, Alertmanager, Grafana, VictoriaLogs, a custom status page, ntfy push alerts, UptimeRobot as an outside probe |
+| Observability | Prometheus, Alertmanager, Grafana, VictoriaLogs, a custom status page, ntfy push alerts, a login watch (alerts on attempts from unknown addresses), UptimeRobot as an outside probe |
 | Backup | restic to off-site storage every night, with end-to-end SHA-256 verification of what was uploaded |
 | Applications | Docker Compose in one VM per zone: Immich (photos), Nextcloud (files), NetBox (source of truth) |
 
@@ -82,7 +82,8 @@ show the trade-offs best:
 - **Post-mortems** of real incidents: a WAF running out of memory on large uploads and a CrowdSec outage
   ([30/09](docs/en/postmortems/2026-09-30-coupures-du-waf.md)), a security test that banned my own household
   ([29/09](docs/en/postmortems/2026-09-29-maison-bannie-par-le-waf.md)), a backup cut by the hosting provider's
-  maintenance ([01/10](docs/en/postmortems/2026-10-01-sauvegarde-maintenance-hebergeur.md)).
+  maintenance ([01/10](docs/en/postmortems/2026-10-01-sauvegarde-maintenance-hebergeur.md)), and the same WAF running out
+  of memory on a phone's automatic backup, then out of disk ([12/10](docs/en/postmortems/2026-10-12-waf-memoire-disque-plein.md)).
 - **Journal**: the [build log](docs/en/journal/), step by step.
 
 ## Repository layout

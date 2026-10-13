@@ -42,14 +42,14 @@ principes:
 
 pile:
   - categorie: Hyperviseur & stockage
-    outils: [Proxmox VE, ZFS RAIDZ2, virtiofs, sanoid]
+    outils: [Proxmox VE, ZFS RAIDZ2, virtiofs, sanoid, restic]
   - categorie: Réseau & sécurité
     outils: [OPNsense, WireGuard, BunkerWeb, CrowdSec, DNSSEC]
-  - categorie: Identité
-    outils: [LLDAP, Authelia, OpenID Connect, WebAuthn]
+  - categorie: Identité & secrets
+    outils: [LLDAP, Authelia, OpenID Connect, WebAuthn, OpenBao]
   - categorie: Infrastructure as Code
     outils: [OpenTofu, Ansible, SOPS + age, GitHub Actions]
-  - categorie: Services
-    outils: [Docker Compose, Traefik, Let's Encrypt, NetBox]
+  - categorie: Services & supervision
+    outils: [Docker Compose, Traefik, Let's Encrypt, NetBox, Prometheus, Grafana, VictoriaLogs]
   - categorie: Publication
     outils: [Cloudflare DNS, Cloudflare Tunnel, Hugo]
