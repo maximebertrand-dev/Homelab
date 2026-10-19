@@ -114,6 +114,59 @@
         enabled: true
         daemon_reload: true
 
+    # Le fichier d'état de systemd-journal-upload change à chaque envoi réussi : son âge dit depuis quand la machine
+    # n'a plus rien envoyé (18/10 : waf01 muet 6 jours sans alerte, l'alerte globale ne voyait que le total).
+    - name: Déposer le relevé de l'envoi du journal
+      ansible.builtin.copy:
+        dest: "{{ item.dest }}"
+        content: "{{ item.contenu }}"
+        owner: root
+        group: root
+        mode: "{{ item.mode }}"
+      loop:
+        - dest: /usr/local/sbin/releve-journaux
+          mode: "0755"
+          contenu: |
+            #!/bin/sh
+            # Géré par Ansible (rôle agent_supervision) : dernier envoi réussi du journal vers la supervision.
+            etat=/var/lib/systemd/journal-upload/state
+            sortie=/var/lib/prometheus/node-exporter/journaux.prom
+            quand=$(stat -c %Y "$etat" 2>/dev/null || echo 0)
+            actif=$(systemctl is-active --quiet systemd-journal-upload && echo 1 || echo 0)
+            printf 'homelab_journaux_envoi_timestamp %s\nhomelab_journaux_envoi_actif %s\n' "$quand" "$actif" > "$sortie.tmp"
+            mv "$sortie.tmp" "$sortie"
+        - dest: /etc/systemd/system/releve-journaux.service
+          mode: "0644"
+          contenu: |
+            # Géré par Ansible (rôle agent_supervision)
+            [Unit]
+            Description=Relevé de l'envoi du journal vers la supervision
+            [Service]
+            Type=oneshot
+            ExecStart=/usr/local/sbin/releve-journaux
+        - dest: /etc/systemd/system/releve-journaux.timer
+          mode: "0644"
+          contenu: |
+            # Géré par Ansible (rôle agent_supervision)
+            [Unit]
+            Description=Relever l'envoi du journal toutes les 2 minutes
+            [Timer]
+            OnBootSec=1min
+            OnUnitActiveSec=2min
+            [Install]
+            WantedBy=timers.target
+      loop_control:
+        label: "{{ item.dest }}"
+      register: agent_supervision_releve_journaux
+
+    - name: Activer le relevé de l'envoi du journal
+      ansible.builtin.systemd_service:
+        name: releve-journaux.timer
+        state: started
+        enabled: true
+        daemon_reload: "{{ agent_supervision_releve_journaux is changed }}"
+      ignore_errors: "{{ ansible_check_mode }}"
+
 # --- État des mises à jour : lu par Prometheus (collecteur textfile), les alertes et la veille de sécurité ---
 - name: Relevé de l'état des mises à jour
   when: agent_supervision_etat_mises_a_jour | bool

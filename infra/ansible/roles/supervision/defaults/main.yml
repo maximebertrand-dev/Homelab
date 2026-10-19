@@ -16,6 +16,8 @@ supervision_retention: 30d
 # (pare-feu). Les machines n'atteignent que l'entrée en écriture ; la lecture se fait par Grafana.
 supervision_journaux: true
 supervision_journaux_retention: 30d
+# Envois simultanés acceptés par VictoriaLogs : au moins un par machine (envoi continu), avec de la marge.
+supervision_journaux_envois_simultanes: 32
 supervision_journaux_espace_max: 10GiB
 supervision_journaux_port: 9428
 supervision_journaux_syslog_port: 5140
@@ -151,6 +153,21 @@ supervision_detection_regles:
     seuil: 1
     resume: "Comptes, sudo ou clés SSH modifiés"
     description: "auditd a vu une écriture sur les comptes, sudoers, la configuration SSH ou des clés autorisées (normal pendant un déploiement Ansible)"
+  # Pas une intrusion, mais seuls les journaux le voient : après une erreur d'écriture, le planificateur de BunkerWeb
+  # 1.6 se marque « base en lecture seule » et n'en sort presque jamais (il ne réessaie que dans les 30 s qui suivent
+  # la tentative précédente, test inversé dans try_database_readonly). Les tâches (listes de blocage, GeoIP,
+  # certificats, sauvegarde) ne passent plus qu'au hasard, sans historique (incident du 16/10/2026).
+  - nom: PlanificateurWafBloque
+    requete: >-
+      CONTAINER_NAME:{{ supervision_connexions_conteneur_waf }} "Database is in read-only mode"
+    par: ""
+    fenetre: 15m
+    seuil: 1
+    severite: admin
+    resume: "Planificateur du WAF bloqué (base en lecture seule)"
+    description: >-
+      BunkerWeb n'exécute plus ses tâches planifiées de façon fiable (certificats, listes, GeoIP, sauvegarde) :
+      relancer le planificateur, docker exec waf-bunkerweb-1 supervisorctl restart scheduler
 supervision_detection_regles_supplementaires: []
 # Règles d'alerte (groupes Prometheus, YAML) et tableaux Grafana (JSON) venus d'ailleurs, ex. d'un dépôt privé :
 # chemins de fichiers sur le poste de contrôle, copiés tels quels (sans interprétation par Ansible, les gabarits

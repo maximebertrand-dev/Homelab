@@ -192,6 +192,15 @@ groups:
         annotations:
           resume: "Collecte {{ $labels.job }} en échec"
           description: "La supervision n'obtient plus les métriques de {{ $labels.job }} ({{ $labels.instance }})."
+      - alert: JournauxNonEnvoyes
+        expr: time() - homelab_journaux_envoi_timestamp > 1800
+        for: 10m
+        labels: { severite: avertissement }
+        annotations:
+          resume: "{{ $labels.instance }} n'envoie plus son journal depuis plus de 30 minutes"
+          description: >-
+            Envoi en échec (journalctl -u systemd-journal-upload : relais saturé, 413, 504) ou journal local qui n'écrit plus
+            (disque plein). Les journaux de la machine manquent dans VictoriaLogs et la détection est aveugle sur elle.
       - alert: JournauxNonRecus
         expr: sum(rate(vl_rows_ingested_total[30m])) == 0
         for: 30m
@@ -314,5 +323,6 @@ groups:
         annotations:
           resume: "Veille des connexions arrêtée ou aveugle"
           description: >-
-            Le conteneur « connexions » de mon01 ne tourne plus ou ne lit plus VictoriaLogs depuis 15 minutes : les
-            tentatives de connexion depuis une adresse inconnue ne sont plus signalées. docker logs supervision-connexions-1.
+            Le conteneur « connexions » de mon01 ne tourne plus, ne lit plus VictoriaLogs, ou ne reçoit plus les journaux
+            du WAF (envoi de waf01 en panne) depuis 15 minutes : les tentatives de connexion depuis une adresse inconnue
+            ne sont plus signalées. docker logs supervision-connexions-1 ; journalctl -u systemd-journal-upload sur waf01.

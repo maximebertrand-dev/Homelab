@@ -46,10 +46,12 @@ critique d'abord.
 | `CourrielsEnEchec`, `CourrielsReleveImpossible` | Console du relais d'e-mails (activité, rejets) ; vérifier SPF, DKIM et DMARC du domaine |
 | `OutilInterneIndisponible`, `CibleDeCollecteInjoignable` | `docker compose ps` et journaux du service concerné |
 | `JournauxNonRecus` | Sur la machine : `systemctl status systemd-journal-upload` ; côté supervision : le conteneur VictoriaLogs |
+| `JournauxNonEnvoyes` | Une machine n'envoie plus son journal depuis 30 min : `journalctl -u systemd-journal-upload -n 20` sur la machine. 504 : VictoriaLogs refuse un envoi de plus (une place par machine, `supervision_journaux_envois_simultanes`) ; 413 : relais d'entrée ; rien de nouveau dans `journalctl` : journal local bloqué (disque plein). Sans curseur sauvegardé, l'envoi repart du début du journal |
+| `PlanificateurWafBloque` | Le planificateur de BunkerWeb s'est marqué « base en lecture seule » et n'en sort pas : tâches (certificats, listes de blocage, GeoIP, sauvegarde) au hasard. Vérifier la base, puis `docker exec waf-bunkerweb-1 supervisorctl restart scheduler` (nginx n'est pas relancé) |
 | `ConnexionsTentativesAdresseInconnue` | Échecs de connexion depuis une adresse jamais vue réussir, sans succès dans les 15 min : Grafana « Connexions » (adresse, opérateur, comptes visés). Isolé et sans suite : rien à faire (le WAF et Authelia limitent les essais) ; répété ou ciblé sur un compte : prévenir la personne, vérifier son mot de passe |
 | `ConnexionsMotDePasseSansSecondFacteur` | Mot de passe accepté mais second facteur raté ou jamais validé. Si ce n'est pas un nouveau membre en train d'enregistrer sa double authentification : **changer le mot de passe du compte** et fermer ses sessions (Authelia) |
 | `ConnexionsNouvellesAdresses` (résumé du matin) | Nouvelles adresses connues depuis la veille : vérifier que l'opérateur et le service sont plausibles pour la famille |
-| `VeilleConnexionsArretee` | `docker logs supervision-connexions-1` sur la machine de supervision ; VictoriaLogs joignable ? |
+| `VeilleConnexionsArretee` | `docker logs supervision-connexions-1` sur la machine de supervision ; VictoriaLogs joignable ? Les journaux du WAF arrivent-ils (`JournauxNonEnvoyes` sur le WAF) ? |
 
 ## Chercher dans les journaux
 

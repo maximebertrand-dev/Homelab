@@ -255,6 +255,10 @@ services:
       - -retention.maxDiskSpaceUsageBytes={{ supervision_journaux_espace_max }}
       - -syslog.listenAddr.tcp=:{{ supervision_journaux_syslog_port }}
       - -syslog.timezone=Europe/Paris
+      # Chaque machine garde un envoi ouvert en continu (systemd-journal-upload) : la limite par défaut (2 × processeurs,
+      # soit 4) laissait les suivantes en attente puis en échec (504) ; 18/10 : waf01, auth01, mon01, svc01 et hv01
+      # n'envoyaient plus rien depuis des jours.
+      - -maxConcurrentInserts={{ supervision_journaux_envois_simultanes }}
     ports: ["{{ supervision_journaux_syslog_port }}:{{ supervision_journaux_syslog_port }}"]   # syslog du pare-feu (écriture seule)
     volumes:
       - victorialogs:/victoria-logs-data

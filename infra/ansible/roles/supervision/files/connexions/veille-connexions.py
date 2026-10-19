@@ -111,6 +111,14 @@ def lire_evenements(conf, debut, fin):
     return sorted(evenements, key=lambda e: e["quand"])
 
 
+def journaux_waf_recents(conf, fin):
+    """Lignes du WAF reçues dans les 10 dernières minutes : le WAF voit au moins une sonde toutes les 30 s ; zéro
+    signifie que ses journaux n'arrivent plus, et que la veille est aveugle (18/10 : des jours sans rien voir)."""
+    requete = f'CONTAINER_NAME:{json.dumps(conf["conteneur_waf"])} "[NGINX.ACCESS]" | stats count() n'
+    lignes = logsql(requete, fin - 600, fin)
+    return int(lignes[0].get("n", 0)) if lignes else 0
+
+
 def lire_comptes(conf, debut, fin):
     """Comptes visés, lus dans les journaux des applications (Authelia : adresse comprise ; d'autres : par l'heure)."""
     comptes = []
@@ -402,6 +410,9 @@ def boucle():
             etat["vus"] = {i: q for i, q in etat["vus"].items() if q > fin - 2 * RECOUVREMENT}
             envoyer(alertes(conf, etat, maintenant) + resume_quotidien(conf, etat, maintenant))
             sauver_etat(etat)
+            if journaux_waf_recents(conf, fin) == 0:
+                lecture_ok = False
+                journal("aveugle", raison="aucune ligne du WAF depuis 10 min")
         except Exception as erreur:  # VictoriaLogs ou Alertmanager indisponible : on réessaie au tour suivant
             lecture_ok = False
             journal("erreur", erreur=repr(erreur))

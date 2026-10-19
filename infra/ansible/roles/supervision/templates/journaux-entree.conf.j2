@@ -9,6 +9,9 @@ server {
 
     location /insert/journald/ {
         limit_except POST { deny all; }
+        # Envoi continu : la requête grossit sans fin, et une machine qui reprend un retard envoie tout d'un bloc ;
+        # la limite de 64 Mo faisait échouer waf01 en boucle (413) depuis la perte de son état (18/10).
+        client_max_body_size 0;
         proxy_pass http://victorialogs:9428;
         proxy_http_version 1.1;
         proxy_request_buffering off;
