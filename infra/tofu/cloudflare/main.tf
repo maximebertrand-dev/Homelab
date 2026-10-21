@@ -107,3 +107,17 @@ resource "cloudflare_dns_record" "messagerie" {
   ttl      = 3600
   comment  = "Envoi des e-mails du homelab (${each.key}) - géré par OpenTofu"
 }
+
+# --- Vérification du domaine par des services tiers ------------------------------------------------
+
+resource "cloudflare_dns_record" "verification" {
+  for_each = var.enregistrements_verification
+
+  zone_id = var.vitrine_zone_id
+  name    = each.value.nom
+  type    = "TXT"
+  content = format("\"%s\"", each.value.contenu)
+  proxied = false
+  ttl     = 3600
+  comment = "Vérification du domaine (${each.key}) - géré par OpenTofu"
+}

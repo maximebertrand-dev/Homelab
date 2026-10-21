@@ -80,3 +80,15 @@ variable "enregistrements_messagerie" {
     error_message = "Types acceptés pour la messagerie : TXT, MX, CNAME."
   }
 }
+
+variable "enregistrements_verification" {
+  description = <<-EOT
+    Enregistrements TXT par lesquels un service tiers vérifie que le domaine nous appartient (portail de développeurs,
+    outil de webmestre…). Clé = libellé libre ; nom = nom complet ; contenu = valeur donnée par le service.
+  EOT
+  type = map(object({
+    nom     = string
+    contenu = string
+  }))
+  default = {}
+}
