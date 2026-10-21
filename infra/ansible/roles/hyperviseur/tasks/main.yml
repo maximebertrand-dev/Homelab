@@ -207,6 +207,108 @@
     - hyperviseur_coffre.correspondance not in (hyperviseur_correspondances.stdout | from_json | map(attribute='id') | list)
   changed_when: true
 
+# --- Cartes confiées aux VM (passage PCI) -----------------------------------------------------------
+
+- name: Réserver les cartes confiées aux VM à vfio-pci dès le démarrage de l'hôte
+  ansible.builtin.copy:
+    dest: /etc/modprobe.d/vfio-passage.conf
+    content: |
+      # Géré par Ansible (rôle hyperviseur) : cartes confiées à une VM, jamais utilisées par l'hôte.
+      options vfio-pci ids={{ hyperviseur_pci | map(attribute='ids') | flatten | join(',') }}
+      {% for pilote in hyperviseur_pci | map(attribute='ecarter', default=[]) | flatten | unique %}
+      blacklist {{ pilote }}
+      softdep {{ pilote }} pre: vfio-pci
+      {% endfor %}
+      # Fonction son des cartes graphiques : vfio-pci la prend avant le pilote son de l'hôte.
+      softdep snd_hda_intel pre: vfio-pci
+    owner: root
+    group: root
+    mode: "0644"
+  when: hyperviseur_pci | length > 0
+  register: hyperviseur_vfio
+
+- name: Charger vfio-pci au démarrage
+  ansible.builtin.copy:
+    dest: /etc/modules-load.d/vfio-passage.conf
+    content: |
+      # Géré par Ansible (rôle hyperviseur)
+      vfio
+      vfio_iommu_type1
+      vfio_pci
+    owner: root
+    group: root
+    mode: "0644"
+  when: hyperviseur_pci | length > 0
+  register: hyperviseur_vfio_modules
+
+- name: Régénérer l'initramfs (vfio-pci doit y prendre les cartes avant les pilotes de l'hôte)  # noqa: no-handler
+  ansible.builtin.command: update-initramfs -u -k all
+  when: hyperviseur_vfio is changed or hyperviseur_vfio_modules is changed
+  changed_when: true
+
+# Sans redémarrer l'hôte : un pilote écarté mais déjà chargé est retiré (échoue s'il sert, il faut alors redémarrer).
+# Proxmox confie ensuite la carte à vfio-pci au démarrage de la VM.
+- name: Retirer les pilotes écartés déjà chargés
+  community.general.modprobe:
+    name: "{{ item }}"
+    state: absent
+  loop: "{{ hyperviseur_pci | map(attribute='ecarter', default=[]) | flatten | unique }}"
+
+- name: Lister les correspondances PCI
+  ansible.builtin.command: pvesh get /cluster/mapping/pci --output-format json
+  register: hyperviseur_correspondances_pci
+  changed_when: false
+  check_mode: false
+  when: hyperviseur_pci | length > 0
+
+- name: Déclarer les cartes en correspondances PCI
+  ansible.builtin.command:
+    argv:
+      - pvesh
+      - create
+      - /cluster/mapping/pci
+      - --id
+      - "{{ item.id }}"
+      - --map
+      - >-
+        node={{ inventory_hostname }},path={{ item.chemin }},id={{ item.ids[0] }},subsystem-id={{ item.sous_systeme
+        }},iommugroup={{ item.groupe_iommu }}
+  loop: "{{ hyperviseur_pci }}"
+  loop_control:
+    label: "{{ item.id }}"
+  when: item.id not in (hyperviseur_correspondances_pci.stdout | from_json | map(attribute='id') | list)
+  changed_when: true
+
+- name: Lire les droits de Proxmox
+  ansible.builtin.command: pveum acl list --output-format json
+  register: hyperviseur_droits
+  changed_when: false
+  check_mode: false
+  when: hyperviseur_pci | length > 0
+
+# Droit limité à chaque correspondance déclarée : le jeton d'OpenTofu n'accède à aucune autre carte de l'hôte.
+- name: Autoriser OpenTofu à attacher les cartes déclarées
+  ansible.builtin.command:
+    argv:
+      - pveum
+      - acl
+      - modify
+      - "/mapping/pci/{{ item.id }}"
+      - --roles
+      - "{{ hyperviseur_pci_acces.role }}"
+      - --users
+      - "{{ hyperviseur_pci_acces.utilisateur }}"
+      - --tokens
+      - "{{ hyperviseur_pci_acces.jeton }}"
+  loop: "{{ hyperviseur_pci }}"
+  loop_control:
+    label: "{{ item.id }}"
+  when: >-
+    hyperviseur_droits.stdout | from_json
+    | selectattr('path', 'equalto', '/mapping/pci/' ~ item.id)
+    | selectattr('ugid', 'equalto', hyperviseur_pci_acces.jeton) | list | length == 0
+  changed_when: true
+
 - name: Lire la configuration des stockages
   ansible.builtin.slurp:
     src: /etc/pve/storage.cfg

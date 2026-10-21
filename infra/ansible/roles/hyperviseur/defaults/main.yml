@@ -29,3 +29,16 @@ hyperviseur_demarrage: {}
 # une sauvegarde du disque de la VM ne suffit donc pas à ouvrir le coffre.
 #   hyperviseur_coffre: { dataset: rpool/coffre, correspondance: coffre-cle, cle: descellement-1 }
 hyperviseur_coffre: {}
+# Cartes PCI confiées en entier à une VM (passage PCI) : réservées à vfio-pci dès le démarrage de l'hôte (ses propres
+# pilotes écartés), puis déclarées en correspondance Proxmox, seule forme qu'un jeton sans les droits de root peut
+# attacher à une VM (OpenTofu).
+#   hyperviseur_pci:
+#     - id: gpu                          # nom de la correspondance, repris dans la description de la VM (OpenTofu)
+#       chemin: "0000:01:00"             # sans numéro de fonction : toutes les fonctions de la carte (vidéo, son)
+#       ids: ["10de:1c81", "10de:0fb9"]  # fabricant:modèle de chaque fonction, la principale d'abord
+#       sous_systeme: "1458:372e"        # vérifié au démarrage de la VM : une autre carte au même endroit est refusée
+#       groupe_iommu: 1
+#       ecarter: [nouveau, nvidiafb]     # pilotes de l'hôte à ne jamais charger
+hyperviseur_pci: []
+# Compte d'OpenTofu autorisé à attacher ces correspondances (rôle Proxmox, utilisateur, jeton).
+hyperviseur_pci_acces: { role: Provisionnement, utilisateur: tofu@pve, jeton: "tofu@pve!homelab" }

@@ -72,6 +72,20 @@ resource "proxmox_virtual_environment_vm" "vm" {
     }
   }
 
+  # Cartes confiées en entier à la VM (passage PCI), par correspondance Proxmox : le jeton n'a de droit que sur
+  # elles. La mémoire de la VM est alors réservée en entier sur l'hôte (accès direct de la carte à la mémoire).
+  dynamic "hostpci" {
+    for_each = { for i, correspondance in each.value.pci : "hostpci${i}" => correspondance }
+    content {
+      device  = hostpci.key
+      mapping = hostpci.value
+      pcie    = true
+      # ROM de la carte cachée : SeaBIOS l'exécutait au démarrage et la VM se figeait avant Linux (19/10). Inutile pour
+      # le calcul et la vidéo (pas d'affichage).
+      rombar = false
+    }
+  }
+
   initialization {
     datastore_id        = var.stockage_vm
     vendor_data_file_id = var.cloud_init_vendor

@@ -17,7 +17,7 @@ tags: [architecture]
 
 | Couche | Outils |
 |---|---|
-| Matériel | Dell PowerEdge T330 (serveur unique), Dell PowerEdge R610 (LAB allumé à la demande, à venir) |
+| Matériel | Dell PowerEdge T330 (serveur unique, carte graphique GTX 1050 confiée à la VM des applications : [ADR 0024](../adr/0024-carte-graphique.md)), Dell PowerEdge R610 (LAB allumé à la demande, à venir) |
 | Hyperviseur & stockage | Proxmox VE, ZFS RAIDZ2 |
 | Réseau & sécurité | OPNsense (virtualisé), VLAN, WireGuard, BunkerWeb (WAF), CrowdSec, Cloudflare (DNS, tunnel de la vitrine) |
 | Identité | LLDAP (annuaire), Authelia (SSO et double authentification), page des comptes (invitations sans mot de passe transmis) |

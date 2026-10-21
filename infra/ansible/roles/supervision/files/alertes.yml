@@ -167,6 +167,23 @@ groups:
         annotations:
           resume: "{{ $labels.instance }} : processeur saturé"
           description: "Processeur occupé à plus de 90 % depuis 15 minutes."
+      # Carte graphique confiée à une VM (rôle gpu_nvidia, relevé releve-gpu).
+      - alert: CarteGraphiqueAbsente
+        expr: homelab_gpu_presente == 0
+        for: 10m
+        labels: { severite: avertissement }
+        annotations:
+          resume: "{{ $labels.instance }} : carte graphique invisible"
+          description: >-
+            nvidia-smi ne répond plus : module du pilote absent (nouveau noyau sans construction DKMS : dkms status),
+            carte retirée ou en panne. Les conteneurs qui la demandent ne redémarreront plus (voir le runbook).
+      - alert: CarteGraphiqueChaude
+        expr: homelab_gpu_temperature_celsius > 85 or homelab_gpu_ralentissement_thermique == 1
+        for: 10m
+        labels: { severite: avertissement }
+        annotations:
+          resume: "{{ $labels.instance }} : carte graphique trop chaude"
+          description: "Plus de 85 °C ou ralentie par la chaleur depuis 10 minutes : flux d'air du serveur, poussière, ventilateur de la carte."
 
   - name: certificats
     rules:

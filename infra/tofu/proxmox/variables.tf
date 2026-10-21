@@ -74,6 +74,7 @@ variable "vms" {
     memoire_mo  = number
     disque_go   = number
     partages    = optional(list(string), []) # correspondances de dossiers virtiofs
+    pci         = optional(list(string), []) # correspondances PCI confiées à la VM (rôle Ansible hyperviseur)
     tags        = optional(list(string), [])
     ordre       = optional(number, 5)  # ordre de démarrage au boot de l'hôte (le pare-feu est à 1)
     delai       = optional(number, 15) # secondes d'attente avant la VM suivante

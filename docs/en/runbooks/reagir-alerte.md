@@ -38,6 +38,8 @@ first.
 | `DisqueEnEchecSMART`, `DefautsDisqueEnHausse` | `smartctl -a /dev/<disk>`; note the trend; order a disk if it keeps rising; check that the pool is healthy |
 | `EspaceDisqueFaible`, `EspaceDisqueCritique` | `df -h` then `docker system df`; prune unused images |
 | `StockageDonneesPresquePlein`, `StockagePoolPresquePlein` | Grafana "Stockage et e-mails"; `zfs list -o name,used,refer,usedbysnapshots,quota`; snapshots and staging areas first; beyond 80–90 %, ZFS slows down |
+| `CarteGraphiqueAbsente` | `nvidia-smi` in the applications VM; `dkms status` (module to rebuild after a new kernel); broken card: remove the applications' card request to fall back to the processor ([ADR 0024](../adr/0024-carte-graphique.md)) |
+| `CarteGraphiqueChaude` | `nvidia-smi -q -d TEMPERATURE,PERFORMANCE`; server airflow, dust, the card's fan |
 | `MemoireSaturee`, `ProcessusTuesFauteDeMemoire`, `ProcesseurSature` | `docker stats` to find the container; `journalctl -k \| grep -i oom`; revisit the VM's resources if it lasts |
 | `CertificatBientotExpire`, `CertificatExpireImminent` | Renewal logs (HTTP-01 on the WAF, DNS-01 on the internal proxy) |
 | `Sauvegarde…` | [Backup runbook](sauvegardes.md): on-demand check from Semaphore |

@@ -17,7 +17,7 @@ tags: [architecture]
 
 | Layer | Tools |
 |---|---|
-| Hardware | Dell PowerEdge T330 (single server), Dell PowerEdge R610 (LAB powered on demand, upcoming) |
+| Hardware | Dell PowerEdge T330 (single server, GTX 1050 graphics card handed to the applications VM: [ADR 0024](../adr/0024-carte-graphique.md)), Dell PowerEdge R610 (LAB powered on demand, upcoming) |
 | Hypervisor & storage | Proxmox VE, ZFS RAIDZ2 |
 | Network & security | OPNsense (virtualised), VLANs, WireGuard, BunkerWeb (WAF), CrowdSec, Cloudflare (DNS, tunnel for the showcase site) |
 | Identity | LLDAP (directory), Authelia (SSO and two-factor authentication), accounts page (invitations without any password being sent) |

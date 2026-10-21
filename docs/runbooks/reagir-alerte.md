@@ -39,6 +39,8 @@ critique d'abord.
 | `DisqueEnEchecSMART`, `DefautsDisqueEnHausse` | `smartctl -a /dev/<disque>` ; noter l'évolution ; commander un disque si elle continue ; vérifier que le pool est sain |
 | `EspaceDisqueFaible`, `EspaceDisqueCritique` | `df -h` puis `docker system df` ; purger les images inutiles |
 | `StockageDonneesPresquePlein`, `StockagePoolPresquePlein` | Grafana « Stockage et e-mails » ; `zfs list -o name,used,refer,usedbysnapshots,quota` ; instantanés et zones de transit d'abord ; au-delà de 80-90 %, ZFS ralentit |
+| `CarteGraphiqueAbsente` | `nvidia-smi` dans la VM des applications ; `dkms status` (module à reconstruire après un nouveau noyau) ; carte en panne : retirer la demande de carte des applications pour repartir sur le processeur ([ADR 0024](../adr/0024-carte-graphique.md)) |
+| `CarteGraphiqueChaude` | `nvidia-smi -q -d TEMPERATURE,PERFORMANCE` ; flux d'air du serveur, poussière, ventilateur de la carte |
 | `MemoireSaturee`, `ProcessusTuesFauteDeMemoire`, `ProcesseurSature` | `docker stats` pour trouver le conteneur ; `journalctl -k \| grep -i oom` ; revoir les ressources de la VM si c'est durable |
 | `CertificatBientotExpire`, `CertificatExpireImminent` | Journaux du renouvellement (HTTP-01 sur le WAF, DNS-01 sur le proxy interne) |
 | `Sauvegarde…` | [Runbook des sauvegardes](sauvegardes.md) : contrôle à la demande depuis Semaphore |

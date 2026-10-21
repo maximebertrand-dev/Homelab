@@ -1,0 +1,144 @@
+# --- Pilote de Debian -------------------------------------------------------------------------------
+- name: Déclarer les composants contrib et non-free de Debian
+  ansible.builtin.copy:
+    dest: /etc/apt/sources.list.d/debian-non-free.sources
+    content: |
+      # Géré par Ansible (rôle gpu_nvidia) : pilote NVIDIA (non-free) et outils associés (contrib).
+      Types: deb
+      URIs: {{ gpu_nvidia_depot_debian }}
+      Suites: {{ ansible_distribution_release }} {{ ansible_distribution_release }}-updates
+      Components: contrib non-free non-free-firmware
+      Signed-By: /usr/share/keyrings/debian-archive-keyring.gpg
+
+      Types: deb
+      URIs: {{ gpu_nvidia_depot_debian_securite }}
+      Suites: {{ ansible_distribution_release }}-security
+      Components: contrib non-free non-free-firmware
+      Signed-By: /usr/share/keyrings/debian-archive-keyring.gpg
+    owner: root
+    group: root
+    mode: "0644"
+  register: gpu_nvidia_sources_debian
+
+# Les en-têtes suivent le noyau en service (« cloud » sur les images cloud de Debian) : DKMS reconstruit le module à
+# chaque nouveau noyau. Le noyau cloud n'a pas de DRM : seul le module d'affichage (nvidia-drm) est vide, le calcul et
+# la vidéo n'en ont pas besoin.
+- name: Installer le pilote NVIDIA (construction du module par DKMS, quelques minutes)
+  ansible.builtin.apt:
+    name: "{{ gpu_nvidia_paquets + ['linux-headers-' ~ ('cloud-amd64' if ansible_kernel is search('cloud') else 'amd64')] }}"
+    state: present
+    install_recommends: false
+    update_cache: "{{ gpu_nvidia_sources_debian is changed }}"
+
+# --- Outils de conteneurs (CDI) ---------------------------------------------------------------------
+- name: Installer la clé du dépôt de NVIDIA (rangée dans le rôle, empreinte vérifiée)
+  ansible.builtin.copy:
+    src: nvidia-conteneurs.asc
+    dest: /etc/apt/keyrings/nvidia-conteneurs.asc
+    owner: root
+    group: root
+    mode: "0644"
+
+- name: Déclarer le dépôt des outils de conteneurs de NVIDIA
+  ansible.builtin.copy:
+    dest: /etc/apt/sources.list.d/nvidia-conteneurs.sources
+    content: |
+      # Géré par Ansible (rôle gpu_nvidia)
+      Types: deb
+      URIs: {{ gpu_nvidia_depot_conteneurs }}
+      Suites: /
+      Signed-By: /etc/apt/keyrings/nvidia-conteneurs.asc
+    owner: root
+    group: root
+    mode: "0644"
+  register: gpu_nvidia_sources_conteneurs
+
+- name: Installer les outils de conteneurs de NVIDIA
+  ansible.builtin.apt:
+    name: nvidia-container-toolkit
+    state: present
+    install_recommends: false
+    update_cache: "{{ gpu_nvidia_sources_conteneurs is changed }}"
+
+# Description CDI de la carte (/var/run/cdi/nvidia.yaml) : régénérée au démarrage et à chaque changement de pilote.
+- name: Tenir à jour la description CDI de la carte
+  ansible.builtin.systemd_service:
+    name: "{{ item }}"
+    enabled: true
+  loop: [nvidia-cdi-refresh.path, nvidia-cdi-refresh.service]
+  ignore_errors: "{{ ansible_check_mode }}"
+
+# --- Relevé pour la supervision (collecteur textfile de node_exporter) ------------------------------
+- name: Déposer le relevé de la carte et sa minuterie
+  ansible.builtin.copy:
+    dest: "{{ item.dest }}"
+    content: "{{ item.contenu }}"
+    owner: root
+    group: root
+    mode: "{{ item.mode }}"
+  loop:
+    - dest: /usr/local/sbin/releve-gpu
+      mode: "0755"
+      contenu: |
+        #!/bin/sh
+        # Géré par Ansible (rôle gpu_nvidia) : état de la carte NVIDIA, lu par Prometheus.
+        # homelab_gpu_presente 0 = nvidia-smi ne répond plus (pilote absent après un nouveau noyau, carte en panne).
+        sortie=/var/lib/prometheus/node-exporter/gpu.prom
+        champs=temperature.gpu,utilization.gpu,utilization.memory,utilization.encoder,utilization.decoder
+        champs=$champs,memory.used,memory.total,fan.speed,encoder.stats.sessionCount,clocks_event_reasons.active
+        ligne=$(nvidia-smi --format=csv,noheader,nounits --query-gpu="$champs" 2>/dev/null | head -n 1)
+        if [ -z "$ligne" ]; then
+          echo "homelab_gpu_presente 0" > "$sortie.tmp"
+        else
+          # Ralentissement thermique : bits « SW thermal » (0x20) et « HW thermal » (0x40) des raisons actives.
+          raisons=$(echo "$ligne" | awk -F', *' '{print $10}')
+          thermique=0
+          case "$raisons" in
+            0x*) [ $(( raisons & 0x60 )) -ne 0 ] && thermique=1 ;;
+          esac
+          echo "$ligne" | awk -F', *' -v thermique="$thermique" '
+            function m(nom, valeur, etiquette) { if (valeur ~ /^[0-9.]+$/) printf "%s%s %s\n", nom, etiquette, valeur }
+            function r(valeur, moteur) { if (valeur ~ /^[0-9.]+$/) printf "homelab_gpu_utilisation_ratio{moteur=\"%s\"} %s\n", moteur, valeur / 100 }
+            {
+              print "homelab_gpu_presente 1"
+              m("homelab_gpu_temperature_celsius", $1, "")
+              r($2, "calcul"); r($3, "memoire"); r($4, "encodeur"); r($5, "decodeur")
+              if ($6 ~ /^[0-9]+$/) printf "homelab_gpu_memoire_octets{type=\"utilisee\"} %d\n", $6 * 1048576
+              if ($7 ~ /^[0-9]+$/) printf "homelab_gpu_memoire_octets{type=\"totale\"} %d\n", $7 * 1048576
+              if ($8 ~ /^[0-9]+$/) printf "homelab_gpu_ventilateur_ratio %s\n", $8 / 100
+              m("homelab_gpu_sessions_encodage", $9, "")
+              print "homelab_gpu_ralentissement_thermique " thermique
+            }' > "$sortie.tmp"
+        fi
+        mv "$sortie.tmp" "$sortie"
+    - dest: /etc/systemd/system/releve-gpu.service
+      mode: "0644"
+      contenu: |
+        # Géré par Ansible (rôle gpu_nvidia)
+        [Unit]
+        Description=Relevé de l'état de la carte NVIDIA pour la supervision
+        [Service]
+        Type=oneshot
+        ExecStart=/usr/local/sbin/releve-gpu
+    - dest: /etc/systemd/system/releve-gpu.timer
+      mode: "0644"
+      contenu: |
+        # Géré par Ansible (rôle gpu_nvidia)
+        [Unit]
+        Description=Relever l'état de la carte NVIDIA
+        [Timer]
+        OnBootSec=1min
+        OnUnitActiveSec={{ gpu_nvidia_releve_minutes }}min
+        [Install]
+        WantedBy=timers.target
+  loop_control:
+    label: "{{ item.dest }}"
+  register: gpu_nvidia_releve
+
+- name: Activer le relevé de la carte
+  ansible.builtin.systemd_service:
+    name: releve-gpu.timer
+    state: started
+    enabled: true
+    daemon_reload: "{{ gpu_nvidia_releve is changed }}"
+  ignore_errors: "{{ ansible_check_mode }}"

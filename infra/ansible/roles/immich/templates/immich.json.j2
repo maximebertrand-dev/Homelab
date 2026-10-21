@@ -20,4 +20,4 @@
     'mobileOverrideEnabled': false
   },
   'newVersionCheck': {'enabled': false}
-} | to_nice_json }}
+} | combine({'ffmpeg': {'accel': 'nvenc', 'accelDecode': true}} if immich_gpu_nvidia else {}) | to_nice_json }}

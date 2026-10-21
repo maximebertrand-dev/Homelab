@@ -10,3 +10,6 @@ immich_claim_role: immich_role
 immich_claim_quota: immich_quota
 # Quota par défaut des nouveaux comptes (Gio ; vide = illimité).
 immich_quota_defaut: null
+# Carte graphique NVIDIA de la VM (rôle gpu_nvidia) : reconnaissance (visages, recherche) en CUDA, vidéos converties
+# par NVENC/NVDEC. La carte est donnée aux conteneurs par CDI (nvidia.com/gpu=all).
+immich_gpu_nvidia: false

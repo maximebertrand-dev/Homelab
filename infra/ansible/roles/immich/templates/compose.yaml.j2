@@ -12,13 +12,21 @@ services:
     env_file: .env
     ports:
       - "2283:2283"   # joignable uniquement depuis le WAF (filtré par OPNsense)
+{% if immich_gpu_nvidia %}
+    devices:
+      - nvidia.com/gpu=all   # adaptation : conversion des vidéos par NVENC (CDI au lieu de hwaccel.transcoding.yml)
+{% endif %}
     depends_on: [redis, database]
     restart: unless-stopped
     healthcheck:
       disable: false
 
   immich-machine-learning:
-    image: ghcr.io/immich-app/immich-machine-learning:${IMMICH_VERSION}
+    image: ghcr.io/immich-app/immich-machine-learning:${IMMICH_VERSION}{{ '-cuda' if immich_gpu_nvidia else '' }}
+{% if immich_gpu_nvidia %}
+    devices:
+      - nvidia.com/gpu=all   # adaptation : CUDA par CDI (au lieu de hwaccel.ml.yml)
+{% endif %}
     volumes:
       - model-cache:/cache
     env_file: .env

@@ -15,6 +15,9 @@
     - common
     - role: docker
       when: docker_active | default(true)
+    # Carte graphique confiée à la VM (passage PCI) : pilote, conteneurs (CDI), relevé.
+    - role: gpu_nvidia
+      when: gpu_nvidia_actif | default(false)
     - agent_supervision
     - mise_a_jour
 

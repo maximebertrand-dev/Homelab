@@ -1,0 +1,21 @@
+# Carte graphique NVIDIA confiée à la VM (passage PCI, rôle hyperviseur et OpenTofu) : pilote de Debian (non-free,
+# construit par DKMS pour le noyau en service, suivi par les mises à jour de Debian), outils de conteneurs de NVIDIA
+# en mode CDI (un conteneur demande « nvidia.com/gpu=all », le daemon.json du rôle docker reste inchangé), relevé
+# pour la supervision.
+gpu_nvidia_depot_debian: mirror+file:///etc/apt/mirrors/debian.list
+gpu_nvidia_depot_debian_securite: mirror+file:///etc/apt/mirrors/debian-security.list
+# Pilote sans interface graphique : calcul (CUDA), encodage et décodage vidéo (NVENC, NVDEC), état (nvidia-smi).
+gpu_nvidia_paquets:
+  - nvidia-kernel-dkms
+  - nvidia-smi
+  - nvidia-persistenced
+  - libcuda1
+  - libnvidia-ptxjitcompiler1
+  - libnvidia-encode1
+  - libnvcuvid1
+  - libnvidia-ml1
+# Outils de conteneurs : absents de Debian, dépôt de NVIDIA. Clé rangée dans le rôle (files/nvidia-conteneurs.asc,
+# empreinte C95B 321B 61E8 8C18 09C4 F759 DDCA E044 F796 ECB0, vérifiée le 19/10/2026) : jamais retéléchargée.
+gpu_nvidia_depot_conteneurs: https://nvidia.github.io/libnvidia-container/stable/deb/amd64
+# Fréquence du relevé (température, charge, mémoire, sessions d'encodage) lu par Prometheus.
+gpu_nvidia_releve_minutes: 1
