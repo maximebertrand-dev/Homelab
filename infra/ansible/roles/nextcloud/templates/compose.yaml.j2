@@ -9,6 +9,7 @@ x-nextcloud: &nextcloud
   volumes:
     - html:/var/www/html
     - {{ nextcloud_donnees }}:/var/www/html/data
+    - ./php/zz-homelab.ini:/usr/local/etc/php/conf.d/zz-homelab.ini:ro
 {% for s in nextcloud_stockages_externes %}
     - {{ s.hote }}:/srv/stockages/{{ s.hote | basename }}
 {% endfor %}

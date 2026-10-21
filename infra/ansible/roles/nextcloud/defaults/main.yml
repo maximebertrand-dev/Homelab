@@ -1,7 +1,10 @@
 nextcloud_dossier: /opt/piles/nextcloud
-nextcloud_image: nextcloud:35.0.1-apache
+nextcloud_image: nextcloud:35.0.2-apache  # PHP 8.5.12 (CERTFR-2026-ALE-014)
 nextcloud_image_postgres: postgres:17.11-trixie
 nextcloud_image_valkey: valkey/valkey:9.1.2-alpine
+# Réglages PHP ajoutés à l'image (conf.d/zz-homelab.ini), monté dans les conteneurs app et cron ; ex. une parade
+# temporaire en attendant une image corrigée : { session.upload_progress.enabled: "Off" }.
+nextcloud_php_ini: {}
 nextcloud_donnees: /srv/drive
 nextcloud_domaine: "drive.{{ domaine_public }}"
 nextcloud_issuer: "https://auth.{{ domaine_public }}"

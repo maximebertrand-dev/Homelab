@@ -8,6 +8,7 @@
   loop:
     - { chemin: "{{ nextcloud_dossier }}", mode: "0750" }
     - { chemin: "{{ nextcloud_dossier }}/secrets", mode: "0700" }
+    - { chemin: "{{ nextcloud_dossier }}/php", mode: "0755" }
     # www-data (33) dans l'image officielle ; les données sont sur le dataset ZFS partagé par virtiofs.
     - { chemin: "{{ nextcloud_donnees }}", mode: "0770", proprietaire: "33" }
 
@@ -57,12 +58,33 @@
     group: root
     mode: "0644"
 
+- name: Déposer les réglages PHP (lus au démarrage du conteneur)
+  ansible.builtin.copy:
+    dest: "{{ nextcloud_dossier }}/php/zz-homelab.ini"
+    content: |
+      ; Géré par Ansible (rôle nextcloud)
+      {% for cle, valeur in nextcloud_php_ini.items() %}
+      {{ cle }} = {{ valeur }}
+      {% endfor %}
+    owner: root
+    group: root
+    mode: "0644"
+  register: nextcloud_php
+
 - name: Démarrer Nextcloud
   community.docker.docker_compose_v2:
     project_src: "{{ nextcloud_dossier }}"
     state: present
     pull: missing
     remove_orphans: true
+
+# Un fichier monté garde l'ancien contenu tant que le conteneur ne redémarre pas.
+- name: Redémarrer Nextcloud pour appliquer les réglages PHP  # noqa: no-handler
+  community.docker.docker_compose_v2:
+    project_src: "{{ nextcloud_dossier }}"
+    services: [app, cron]
+    state: restarted
+  when: nextcloud_php is changed
 
 - name: Attendre la fin de l'installation de Nextcloud
   ansible.builtin.command:
