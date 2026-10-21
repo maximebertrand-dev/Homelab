@@ -10,3 +10,12 @@ enable-signup: false
 enable-login: true
 # Notifications instantanées sur iOS : ntfy.sh ne reçoit qu'un identifiant de message, jamais son contenu.
 upstream-base-url: "https://ntfy.sh"
+{% if supervision_ntfy_pieces_jointes %}
+# Pièces jointes, gardées sur le disque de la supervision puis effacées.
+attachment-cache-dir: /var/cache/ntfy/pieces-jointes
+attachment-file-size-limit: "{{ supervision_ntfy_pieces_jointes.fichier }}"
+attachment-total-size-limit: "{{ supervision_ntfy_pieces_jointes.total }}"
+attachment-expiry-duration: "{{ supervision_ntfy_pieces_jointes.duree }}"
+visitor-attachment-total-size-limit: "{{ supervision_ntfy_pieces_jointes.par_utilisateur }}"
+visitor-attachment-daily-bandwidth-limit: "{{ supervision_ntfy_pieces_jointes.debit_quotidien }}"
+{% endif %}

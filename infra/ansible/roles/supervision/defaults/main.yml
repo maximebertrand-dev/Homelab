@@ -53,6 +53,14 @@ supervision_noc_libelles: {}
 # supervision_noc_libelles.transferts ({ <travail>: <nom affiché> }).
 supervision_noc_groupe_admin: admins
 supervision_ntfy_url: "https://ntfy.{{ domaine_public }}"
+# Sujets ntfy d'autres applications : un compte d'écriture (authentifié par un jeton que l'on crée soi-même avec
+# « ntfy token add <compte> », jamais stocké par Ansible) et des comptes en lecture.
+#   - { sujet: mon-appli, ecrivain: mon-appli, lecteurs: [maxime] }
+supervision_ntfy_sujets_supplementaires: []
+# Pièces jointes (ex. une vidéo prête à publier) : taille par fichier, total sur le serveur, durée de conservation,
+# quota par utilisateur et débit quotidien (envoi et téléchargement). Vide = pièces jointes refusées.
+supervision_ntfy_pieces_jointes: {}
+#   { fichier: 100M, total: 2G, duree: 48h, par_utilisateur: 500M, debit_quotidien: 2G }
 supervision_issuer: "https://auth.{{ domaine_public }}"
 # Autorité interne (certificats des outils qui ne passent pas par Let's Encrypt, ex. le coffre OpenBao).
 supervision_ca_interne: "{{ ca_interne.certificat | default('') }}"
