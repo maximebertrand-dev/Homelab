@@ -1,5 +1,5 @@
 waf_dossier: /opt/piles/waf
-waf_image: bunkerity/bunkerweb-all-in-one:1.6.15
+waf_image: bunkerity/bunkerweb-all-in-one:1.6.17
 # Pays autorisés (codes ISO ou groupes BunkerWeb comme @EU) : tout le reste est refusé.
 waf_pays_autorises: "FR"
 # Codes HTTP comptés comme « comportement suspect » (10 en 60 s = bannissement). 429 (limite de débit) n'en fait

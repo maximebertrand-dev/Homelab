@@ -1,6 +1,6 @@
 netbox_dossier: /opt/piles/netbox
 netbox_version_docker: "5.1.1"
-netbox_image: "docker.io/netboxcommunity/netbox:v4.7.1-5.1.1"
+netbox_image: "docker.io/netboxcommunity/netbox:v4.7.3-5.1.1"
 # Processus web (Granian) : chacun charge toute l'application (≈ 320 Mo).
 netbox_processus_web: 1
 netbox_url: "https://netbox.{{ domaine_interne }}"

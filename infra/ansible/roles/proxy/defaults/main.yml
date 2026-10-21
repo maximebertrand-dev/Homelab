@@ -1,5 +1,5 @@
 proxy_dossier: /opt/piles/proxy
-proxy_image: traefik:v3.7.13
+proxy_image: traefik:v3.7.16
 proxy_email_acme: "admin@{{ domaine_public }}"
 # Seuls les postes du VPN d'administration passent (défense en profondeur : OPNsense filtre déjà).
 proxy_sources_autorisees: []

@@ -1,5 +1,5 @@
 immich_dossier: /opt/piles/immich
-immich_version: v3.2.4
+immich_version: v3.3.5
 immich_bibliotheque: /srv/photos
 immich_url: "https://photos.{{ domaine_public }}"
 immich_issuer: "https://auth.{{ domaine_public }}"
