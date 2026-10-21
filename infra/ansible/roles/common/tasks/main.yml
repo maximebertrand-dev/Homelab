@@ -5,7 +5,7 @@
 
 - name: Installer les paquets de base
   ansible.builtin.apt:
-    name: "{{ common_paquets }}"
+    name: "{{ common_paquets + common_paquets_supplementaires }}"
     state: present
 
 - name: Installer l'agent QEMU (VM uniquement)

@@ -20,6 +20,8 @@ common_paquets:
   - unattended-upgrades
   - apt-listchanges
   - needrestart
+# Paquets propres à une machine, en plus de la liste commune (ex. rsync, tmux).
+common_paquets_supplementaires: []
 # Clés SSH supplémentaires autorisées pour le compte de connexion d'Ansible, limitées à une adresse source
 # (ex. l'orchestrateur Semaphore) : [{ cle: "ssh-ed25519 AAAA… commentaire", depuis: "adresse" }].
 common_cles_autorisees: []
